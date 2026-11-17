@@ -1,97 +1,94 @@
 
 /*
  * Quantumult X - IP Geolocation Checker
- * API: ip-api.com
- * Ngôn ngữ hiển thị: Tiếng Việt
+ * Vietnamese Edition
+ *
+ * Chỉ sử dụng 12 trường:
+ * status, message, country, countryCode,
+ * regionName, city, lat, lon, timezone,
+ * isp, org, query
  */
 
-// 1. Kiểm tra phản hồi HTTP
-if (!$response || $response.statusCode !== 200) {
+if (!$response || $response.statusCode !== 200 || !$response.body) {
   $done(null);
-  return;
-}
+} else {
+  try {
+    const data = JSON.parse($response.body);
 
-// 2. Phân tích dữ liệu JSON
-let data;
+    // Xử lý dữ liệu trống
+    function giaTri(value) {
+      return value === undefined || value === null || value === ""
+        ? "Không có dữ liệu"
+        : String(value);
+    }
 
-try {
-  data = JSON.parse($response.body);
-} catch (error) {
-  $done(null);
-  return;
-}
+    // Chuyển mã quốc gia thành emoji cờ
+    function layCo(ma) {
+      if (typeof ma !== "string" || !/^[A-Za-z]{2}$/.test(ma)) {
+        return "🌐";
+      }
 
-// 3. Hàm xử lý dữ liệu trống
-function giaTri(value) {
-  if (value === undefined || value === null || value === "") {
-    return "Không có dữ liệu";
+      ma = ma.toUpperCase();
+
+      return String.fromCodePoint(
+        127397 + ma.charCodeAt(0),
+        127397 + ma.charCodeAt(1)
+      );
+    }
+
+    const trangThai = data.status === "success"
+      ? "Thành công"
+      : "Thất bại";
+
+    const thongBao = data.message
+      ? giaTri(data.message)
+      : data.status === "success"
+        ? "Không có thông báo"
+        : "Không có dữ liệu";
+
+    const quocGia = giaTri(data.country);
+    const thanhPho = data.city ? String(data.city) : "";
+    const vung = data.regionName ? String(data.regionName) : "";
+
+    const title = data.status === "success"
+      ? `${layCo(data.countryCode)} ${thanhPho || vung || quocGia}`
+      : "🌐 Không thể xác định IP";
+
+    const ip = giaTri(data.query);
+
+    const subtitle = data.status === "success"
+      ? `${giaTri(data.isp)} • ${ip}`
+      : thongBao;
+
+    // Chỉ hiển thị đúng các trường được yêu cầu
+    const description = [
+      `TRẠNG THÁI (status): ${trangThai}`,
+      `THÔNG BÁO (message): ${thongBao}`,
+      `QUỐC GIA (country): ${quocGia}`,
+      `MÃ QUỐC GIA (countryCode): ${giaTri(data.countryCode)}`,
+      `TỈNH / VÙNG (regionName): ${giaTri(data.regionName)}`,
+      `THÀNH PHỐ (city): ${giaTri(data.city)}`,
+      `VĨ ĐỘ (lat): ${giaTri(data.lat)}`,
+      `KINH ĐỘ (lon): ${giaTri(data.lon)}`,
+      `MÚI GIỜ (timezone): ${giaTri(data.timezone)}`,
+      `NHÀ MẠNG (isp): ${giaTri(data.isp)}`,
+      `TỔ CHỨC (org): ${giaTri(data.org)}`,
+      `ĐỊA CHỈ IP (query): ${ip}`
+    ].join("\n\n");
+
+    $done({
+      title: title,
+      subtitle: subtitle,
+      ip: ip,
+      description: description
+    });
+
+  } catch (error) {
+    $done({
+      title: "Lỗi Geolocation",
+      subtitle: "Không thể đọc dữ liệu JSON",
+      ip: "",
+      description: String(error)
+    });
   }
-
-  return String(value);
 }
-
-// 4. Chuyển mã quốc gia thành emoji cờ
-function layCo(maQuocGia) {
-  if (!maQuocGia || maQuocGia.length !== 2) {
-    return "🌐";
-  }
-
-  const ma = maQuocGia.toUpperCase();
-
-  return String.fromCodePoint(
-    127397 + ma.charCodeAt(0),
-    127397 + ma.charCodeAt(1)
-  );
-}
-
-// 5. Xử lý trạng thái API
-const trangThai = data.status === "success"
-  ? "Thành công"
-  : "Thất bại";
-
-const thongBao = data.status === "success"
-  ? "Không có lỗi"
-  : giaTri(data.message);
-
-// 6. Tạo tiêu đề
-const title = data.status === "success"
-  ? `${layCo(data.countryCode)} ${giaTri(data.country)}`
-  : "⚠️ Không thể xác định IP";
-
-// 7. Tạo dòng thông tin ngắn
-const subtitle = [
-  giaTri(data.city),
-  giaTri(data.regionName),
-  giaTri(data.query)
-].join(" • ");
-
-// 8. Địa chỉ IP
-const ip = giaTri(data.query);
-
-// 9. Tạo nội dung chi tiết
-const description = [
-  `TRẠNG THÁI: ${trangThai}`,
-  `THÔNG BÁO: ${thongBao}`,
-  "",
-  `QUỐC GIA: ${giaTri(data.country)}`,
-  `MÃ QUỐC GIA: ${giaTri(data.countryCode)}`,
-  `TỈNH / THÀNH PHỐ: ${giaTri(data.regionName)}`,
-  `THÀNH PHỐ: ${giaTri(data.city)}`,
-  "",
-  `VĨ ĐỘ: ${giaTri(data.lat)}`,
-  `KINH ĐỘ: ${giaTri(data.lon)}`,
-  `MÚI GIỜ: ${giaTri(data.timezone)}`,
-  "",
-  `NHÀ MẠNG (ISP): ${giaTri(data.isp)}`,
-  `TỔ CHỨC (ORG): ${giaTri(data.org)}`,
-  "",
-  `ĐỊA CHỈ IP: ${ip}`
-].join("\n");
-
-// 10. Trả kết quả về Quantumult X
-$done({
-  title: title,
-  subtitle: subtitle,
-  ip: ip,
-  description: description
-});
