@@ -1,9 +1,9 @@
 
 # Apple Push Notification Service (APNs)
 
-domain-SUFFIX,apple.com.edgekey.net
+domain-suffix,apple.com.edgekey.net
 domain-suffix, push.apple.com
-domain-SUFFIX,push-apple.com.akadns.net
+domain-suffix,push-apple.com.akadns.net
 domain-keyword, courier
 domain, gateway.icloud.com
 ip-cidr, 17.0.0.0/8, no-resolve
