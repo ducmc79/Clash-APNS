@@ -5,4 +5,4 @@ host-suffix, push.apple.com, proxy
 host-suffix,push-apple.com.akadns.net,proxy
 host-keyword, courier, proxy
 host, gateway.icloud.com, proxy
-ip-cidr, 17.0.0.0/8, no-resolve,proxy
+ip-cidr, 17.0.0.0/8,proxy
