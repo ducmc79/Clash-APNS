@@ -1,8 +1,8 @@
 # Apple Push Notification Service (APNs)
 
 HOST-SUFFIX,apple.com.edgekey.net,proxy
-HOST-SUFFIX,push-apple.com.akadns.net,proxy
 host, gateway.icloud.com, PROXY
 host-suffix, push.apple.com, PROXY
+HOST-SUFFIX,push-apple.com.akadns.net,proxy
 host-keyword, courier, PROXY
 ip-cidr, 17.0.0.0/8, PROXY
