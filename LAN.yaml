@@ -1,4 +1,4 @@
-payload:
+
   # > LAN
   # No no-resolve: domains whose records point at these ranges must match here.
   - DOMAIN-SUFFIX,local
